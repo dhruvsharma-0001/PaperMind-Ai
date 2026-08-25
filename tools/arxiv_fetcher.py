@@ -27,8 +27,9 @@ def fetch_arxiv_pdf(paper_url: str) -> bytes:
     """Download PDF bytes from an arXiv URL or identifier."""
     pdf_url = normalize_arxiv_url(paper_url)
     headers = {
-        "User-Agent": "PaperTutorAgent/1.0 (Educational research assistant; mailto:contact@example.com)"
+        "User-Agent": "PaperMindAI/1.0 (Autonomous research assistant; mailto:contact@example.com)"
     }
+
     
     try:
         resp = requests.get(pdf_url, headers=headers, timeout=45)

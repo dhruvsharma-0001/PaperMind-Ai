@@ -21,10 +21,11 @@ def index():
 def health():
     return jsonify({
         "status": "online",
-        "service": "paper-tutor-agent",
+        "service": "papermind-ai",
         "provider": LLM_PROVIDER,
         "model": MODEL_NAME,
         "port": PORT,
+
         "endpoints": {
             "POST /analyze": {
                 "body": {"paper_url": "https://arxiv.org/abs/1706.03762"}
