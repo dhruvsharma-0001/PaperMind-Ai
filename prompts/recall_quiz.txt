@@ -1,0 +1,7 @@
+Based on the following notes, write 3-5 short quiz questions that test
+whether someone actually understood the core method (not trivia).
+
+Notes:
+{understanding_notes}
+
+Return each question with its correct answer and a one-line explanation.

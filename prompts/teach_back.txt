@@ -1,0 +1,6 @@
+Based on these understanding notes, produce:
+1. A short code sketch reimplementing the core method/algorithm.
+2. A 3-5 sentence teach-back summary, as if explaining it to a peer.
+
+Notes:
+{understanding_notes}

@@ -1,0 +1,13 @@
+flask
+langgraph
+langchain
+langchain-core
+langchain-groq
+langchain-google-genai
+langchain-anthropic
+pypdf
+requests
+python-dotenv
+pydantic
+pytest
+

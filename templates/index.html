@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Tutor Agent — AI Research Paper Breakdown</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Marked for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Highlight.js for code highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    .prose pre {
+      background-color: #0f172a !important;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+    .prose code {
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .glow-effect {
+      box-shadow: 0 0 50px -10px rgba(56, 189, 248, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i class="ph-bold ph-graduation-cap text-xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight tracking-tight">Paper Tutor <span class="text-sky-400">Agent</span></h1>
+          <p class="text-xs text-slate-400">First-Principles Feynman Tutor & Code Generator</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs text-slate-300">
+          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Provider: <strong class="text-sky-400 uppercase tracking-wider" id="headerProvider">{{ provider }}</strong></span>
+          <span class="text-slate-500">•</span>
+          <span class="text-slate-400" id="headerModel">{{ model }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
+    
+    <!-- Hero / Input Section -->
+    <section class="mb-10 text-center max-w-3xl mx-auto">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+        Master Any Paper From <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">First Principles</span>
+      </h2>
+      <p class="text-slate-400 text-sm sm:text-base mb-6">
+        Ingest arXiv papers or upload your own research PDF. Deconstruct core mechanisms with the Feynman technique, test comprehension, and generate clean reference code.
+      </p>
+
+      <!-- Input Switcher (URL vs File Upload) -->
+      <div class="inline-flex p-1 bg-slate-900 border border-slate-800 rounded-xl mb-4 text-xs font-medium text-slate-400">
+        <button type="button" onclick="setInputMode('url')" id="mode-btn-url" class="px-4 py-1.5 rounded-lg bg-sky-600 text-white shadow transition flex items-center gap-1.5">
+          <i class="ph-bold ph-link"></i>
+          <span>arXiv URL / ID</span>
+        </button>
+        <button type="button" onclick="setInputMode('upload')" id="mode-btn-upload" class="px-4 py-1.5 rounded-lg hover:text-white transition flex items-center gap-1.5">
+          <i class="ph-bold ph-upload-simple"></i>
+          <span>Upload PDF</span>
+        </button>
+      </div>
+
+      <!-- URL Input Form -->
+      <form id="urlForm" class="max-w-2xl mx-auto mb-4">
+        <div class="flex items-center rounded-2xl bg-slate-900 border-2 border-slate-800 focus-within:border-sky-500 shadow-xl overflow-hidden transition-all duration-200">
+          <div class="pl-4 text-slate-400">
+            <i class="ph ph-link text-xl"></i>
+          </div>
+          <input 
+            type="text" 
+            id="paperUrlInput" 
+            placeholder="Paste arXiv URL or ID (e.g. 1706.03762 or https://arxiv.org/abs/2106.09685)" 
+            class="w-full bg-transparent px-4 py-3.5 text-sm sm:text-base outline-none text-slate-100 placeholder-slate-500"
+          />
+          <button 
+            type="submit" 
+            id="urlSubmitBtn" 
+            class="m-1.5 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-medium text-sm flex items-center gap-2 shadow-md transition-all active:scale-95 whitespace-nowrap"
+          >
+            <span>Analyze</span>
+            <i class="ph-bold ph-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Quick Preset Suggestions -->
+        <div class="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400 mt-4">
+          <span class="text-slate-500 font-medium">Try classic papers:</span>
+          <button type="button" onclick="setPaper('1706.03762')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">
+            ⚡ Transformer (Attention)
+          </button>
+          <button type="button" onclick="setPaper('2106.09685')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">
+            🎯 LoRA Fine-Tuning
+          </button>
+          <button type="button" onclick="setPaper('2006.11239')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">
+            🎨 Diffusion (DDPM)
+          </button>
+          <button type="button" onclick="setPaper('2205.14135')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition">
+            ⚡ FlashAttention
+          </button>
+        </div>
+      </form>
+
+      <!-- PDF Upload Form (Hidden by default) -->
+      <form id="uploadForm" class="hidden max-w-2xl mx-auto mb-4">
+        <div 
+          id="dropZone" 
+          onclick="document.getElementById('pdfFileInput').click()"
+          class="cursor-pointer border-2 border-dashed border-slate-700 hover:border-sky-500 bg-slate-900/60 hover:bg-slate-900/90 rounded-2xl p-8 text-center transition-all duration-200"
+        >
+          <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="handleFileSelected(this.files)" />
+          
+          <div id="dropZonePrompt" class="flex flex-col items-center justify-center gap-2">
+            <div class="h-12 w-12 rounded-2xl bg-sky-950/80 border border-sky-800/60 flex items-center justify-center text-sky-400 text-2xl mb-1">
+              <i class="ph ph-file-pdf"></i>
+            </div>
+            <p class="font-medium text-slate-200 text-sm">Click to browse or drag & drop research PDF here</p>
+            <p class="text-xs text-slate-400">Supports standard academic papers (.pdf)</p>
+          </div>
+
+          <div id="fileSelectedInfo" class="hidden flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left">
+            <div class="flex items-center gap-3 truncate">
+              <i class="ph-bold ph-file-pdf text-2xl text-rose-400 shrink-0"></i>
+              <div class="truncate">
+                <p id="selectedFileName" class="text-sm font-semibold text-slate-100 truncate">paper.pdf</p>
+                <p id="selectedFileSize" class="text-xs text-slate-400">0 KB</p>
+              </div>
+            </div>
+            <button type="button" onclick="event.stopPropagation(); clearSelectedFile()" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="uploadSubmitBtn" 
+          class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled
+        >
+          <i class="ph-bold ph-magic-wand"></i>
+          <span>Analyze Uploaded PDF</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Live Status / Progress Bar (Hidden by default) -->
+    <div id="progressContainer" class="hidden mb-10 max-w-3xl mx-auto">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 glow-effect">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-sky-400 border-t-transparent"></div>
+            <span id="progressMessage" class="font-medium text-slate-200 text-sm">Processing and extracting paper text...</span>
+          </div>
+          <span id="progressTime" class="text-xs text-slate-500 font-mono">running</span>
+        </div>
+        
+        <!-- Pipeline Stage Indicators -->
+        <div class="grid grid-cols-4 gap-2 pt-2">
+          <div id="step-ingest" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs text-center transition">
+            <i class="ph ph-file-pdf text-lg text-sky-400"></i>
+            <span>1. Ingest PDF</span>
+          </div>
+          <div id="step-understand" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs text-center transition">
+            <i class="ph ph-brain text-lg text-indigo-400"></i>
+            <span>2. Understand</span>
+          </div>
+          <div id="step-recall" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs text-center transition">
+            <i class="ph ph-exam text-lg text-amber-400"></i>
+            <span>3. Self-Quiz</span>
+          </div>
+          <div id="step-apply" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs text-center transition">
+            <i class="ph ph-code text-lg text-emerald-400"></i>
+            <span>4. Code & Teach</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="errorBox" class="hidden mb-8 max-w-3xl mx-auto p-4 rounded-2xl bg-rose-950/40 border border-rose-800/50 text-rose-200 flex items-start gap-3">
+      <i class="ph-bold ph-warning-circle text-2xl text-rose-400 shrink-0 mt-0.5"></i>
+      <div>
+        <h4 class="font-semibold text-sm">Processing Error</h4>
+        <p id="errorMessage" class="text-xs text-rose-300 mt-1"></p>
+      </div>
+    </div>
+
+    <!-- Results Container (Hidden until response received) -->
+    <div id="resultsContainer" class="hidden space-y-6">
+      
+      <!-- Top Metrics Banner -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Score Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Recall Comprehension</p>
+            <p id="metricScore" class="text-3xl font-extrabold text-emerald-400 mt-1">--%</p>
+            <p id="metricFeedback" class="text-xs text-slate-400 mt-1 line-clamp-1">Self-evaluation score</p>
+          </div>
+          <div class="h-12 w-12 rounded-2xl bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center">
+            <i class="ph-bold ph-seal-check text-2xl text-emerald-400"></i>
+          </div>
+        </div>
+
+        <!-- Attempts / Retry Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Refinement Loop</p>
+            <p id="metricAttempts" class="text-3xl font-extrabold text-sky-400 mt-1">1 <span class="text-sm font-normal text-slate-500">attempt</span></p>
+            <p class="text-xs text-slate-400 mt-1">Pass threshold: 70%</p>
+          </div>
+          <div class="h-12 w-12 rounded-2xl bg-sky-950/60 border border-sky-800/50 flex items-center justify-center">
+            <i class="ph-bold ph-arrows-clockwise text-2xl text-sky-400"></i>
+          </div>
+        </div>
+
+        <!-- Paper Info Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Source Document</p>
+            <p id="metricPaperId" class="text-base font-bold text-slate-200 mt-1 truncate max-w-[180px]">arXiv Paper</p>
+            <a id="metricPaperLink" href="#" target="_blank" class="inline-flex items-center gap-1 text-xs text-sky-400 hover:underline mt-1">
+              <span>View Source</span>
+              <i class="ph ph-arrow-square-out"></i>
+            </a>
+          </div>
+          <div class="h-12 w-12 rounded-2xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center">
+            <i class="ph-bold ph-file-text text-2xl text-indigo-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-1.5 flex flex-wrap gap-1">
+        <button onclick="switchTab('tab-understand')" id="btn-tab-understand" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white transition flex items-center justify-center gap-2 bg-sky-600 text-white shadow">
+          <i class="ph-bold ph-lightbulb"></i>
+          <span>1. First-Principles</span>
+        </button>
+        <button onclick="switchTab('tab-code')" id="btn-tab-code" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+          <i class="ph-bold ph-code"></i>
+          <span>2. Code & Teach-Back</span>
+        </button>
+        <button onclick="switchTab('tab-quiz')" id="btn-tab-quiz" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+          <i class="ph-bold ph-exam"></i>
+          <span>3. Recall Quiz (<span id="quizCount">0</span>)</span>
+        </button>
+        <button onclick="switchTab('tab-sections')" id="btn-tab-sections" class="tab-btn flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+          <i class="ph-bold ph-article"></i>
+          <span>4. Extracted Sections</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: First-Principles Breakdown -->
+      <div id="tab-understand" class="tab-content bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+          <div class="flex items-center gap-2 text-sky-400">
+            <i class="ph-bold ph-lightbulb text-xl"></i>
+            <h3 class="font-bold text-lg text-slate-100">Feynman Technique Breakdown</h3>
+          </div>
+          <span class="text-xs text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">De-jargonized intuition</span>
+        </div>
+        <div id="understandContent" class="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm sm:text-base"></div>
+      </div>
+
+      <!-- Tab 2: Code Sketch & Teach-Back -->
+      <div id="tab-code" class="tab-content hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+          <div class="flex items-center gap-2 text-emerald-400">
+            <i class="ph-bold ph-code text-xl"></i>
+            <h3 class="font-bold text-lg text-slate-100">Executable Code Sketch & Peer Teach-Back</h3>
+          </div>
+          <button onclick="copyCode()" class="text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+            <i class="ph ph-copy"></i>
+            <span id="copyBtnText">Copy Markdown</span>
+          </button>
+        </div>
+        <div id="applyContent" class="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm sm:text-base"></div>
+      </div>
+
+      <!-- Tab 3: Recall Quiz -->
+      <div id="tab-quiz" class="tab-content hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+        <div class="border-b border-slate-800 pb-4 mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-amber-400">
+              <i class="ph-bold ph-exam text-xl"></i>
+              <h3 class="font-bold text-lg text-slate-100">Comprehension Self-Assessment</h3>
+            </div>
+            <div id="quizBadgeScore" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800">
+              Score: 0%
+            </div>
+          </div>
+          <p id="quizFeedbackDetail" class="text-xs text-slate-400 mt-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800"></p>
+        </div>
+        <div id="quizCardsContainer" class="space-y-4"></div>
+      </div>
+
+      <!-- Tab 4: Raw Sections -->
+      <div id="tab-sections" class="tab-content hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+        <div class="border-b border-slate-800 pb-4 mb-6 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-indigo-400">
+            <i class="ph-bold ph-article text-xl"></i>
+            <h3 class="font-bold text-lg text-slate-100">Extracted PDF Sections</h3>
+          </div>
+          <span id="sectionPageCount" class="text-xs text-slate-400">0 pages parsed</span>
+        </div>
+        <div id="sectionsContainer" class="space-y-4"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <p>Powered by <strong>LangGraph</strong> & <strong>Groq Fast Inference</strong> • Paper Tutor Agent</p>
+  </footer>
+
+  <!-- Script logic -->
+  <script>
+    let currentRawData = null;
+    let selectedFile = null;
+
+    function setInputMode(mode) {
+      if (mode === 'url') {
+        document.getElementById('urlForm').classList.remove('hidden');
+        document.getElementById('uploadForm').classList.add('hidden');
+        document.getElementById('mode-btn-url').classList.add('bg-sky-600', 'text-white', 'shadow');
+        document.getElementById('mode-btn-upload').classList.remove('bg-sky-600', 'text-white', 'shadow');
+      } else {
+        document.getElementById('urlForm').classList.add('hidden');
+        document.getElementById('uploadForm').classList.remove('hidden');
+        document.getElementById('mode-btn-upload').classList.add('bg-sky-600', 'text-white', 'shadow');
+        document.getElementById('mode-btn-url').classList.remove('bg-sky-600', 'text-white', 'shadow');
+      }
+    }
+
+    function setPaper(id) {
+      document.getElementById('paperUrlInput').value = id;
+    }
+
+    function handleFileSelected(files) {
+      if (!files || files.length === 0) return;
+      selectedFile = files[0];
+      
+      document.getElementById('selectedFileName').innerText = selectedFile.name;
+      const sizeKb = Math.round(selectedFile.size / 1024);
+      document.getElementById('selectedFileSize').innerText = sizeKb > 1024 ? `${(sizeKb/1024).toFixed(1)} MB` : `${sizeKb} KB`;
+
+      document.getElementById('dropZonePrompt').classList.add('hidden');
+      document.getElementById('fileSelectedInfo').classList.remove('hidden');
+      
+      const submitBtn = document.getElementById('uploadSubmitBtn');
+      submitBtn.disabled = false;
+    }
+
+    function clearSelectedFile() {
+      selectedFile = null;
+      document.getElementById('pdfFileInput').value = '';
+      document.getElementById('dropZonePrompt').classList.remove('hidden');
+      document.getElementById('fileSelectedInfo').classList.add('hidden');
+      document.getElementById('uploadSubmitBtn').disabled = true;
+    }
+
+    // Drag and Drop support
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-sky-500', 'bg-slate-900');
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-sky-500', 'bg-slate-900');
+      }, false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0) {
+        if (files[0].type === 'application/pdf' || files[0].name.endsWith('.pdf')) {
+          handleFileSelected(files);
+        } else {
+          alert('Please select a valid PDF file.');
+        }
+      }
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-sky-600', 'text-white', 'shadow');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-sky-600', 'text-white', 'shadow');
+      }
+    }
+
+    function copyCode() {
+      if (!currentRawData || !currentRawData.output) return;
+      navigator.clipboard.writeText(currentRawData.output);
+      const copyBtn = document.getElementById('copyBtnText');
+      copyBtn.innerText = 'Copied!';
+      setTimeout(() => copyBtn.innerText = 'Copy Markdown', 2000);
+    }
+
+    async function submitAnalysis(requestBody, isMultipart) {
+      // UI States
+      document.getElementById('errorBox').classList.add('hidden');
+      document.getElementById('resultsContainer').classList.add('hidden');
+      document.getElementById('progressContainer').classList.remove('hidden');
+
+      const urlBtn = document.getElementById('urlSubmitBtn');
+      const uploadBtn = document.getElementById('uploadSubmitBtn');
+      urlBtn.disabled = true;
+      uploadBtn.disabled = true;
+
+      const startTime = Date.now();
+      const timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('progressTime').innerText = `${elapsed}s elapsed`;
+      }, 1000);
+
+      try {
+        const fetchOptions = {
+          method: 'POST',
+          body: requestBody
+        };
+        if (!isMultipart) {
+          fetchOptions.headers = { 'Content-Type': 'application/json' };
+        }
+
+        const response = await fetch('/analyze', fetchOptions);
+        const data = await response.json();
+        clearInterval(timerInterval);
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Failed to analyze paper');
+        }
+
+        currentRawData = data;
+        renderResults(data);
+      } catch (err) {
+        clearInterval(timerInterval);
+        document.getElementById('errorMessage').innerText = err.message;
+        document.getElementById('errorBox').classList.remove('hidden');
+      } finally {
+        document.getElementById('progressContainer').classList.add('hidden');
+        urlBtn.disabled = false;
+        if (selectedFile) uploadBtn.disabled = false;
+      }
+    }
+
+    // Submit URL Form
+    document.getElementById('urlForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const paperUrl = document.getElementById('paperUrlInput').value.trim();
+      if (!paperUrl) return;
+      submitAnalysis(JSON.stringify({ paper_url: paperUrl }), false);
+    });
+
+    // Submit Upload Form
+    document.getElementById('uploadForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedFile) return;
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      submitAnalysis(formData, true);
+    });
+
+    function renderResults(data) {
+      // Top Metrics
+      const scorePct = Math.round((data.quiz_score || 0) * 100);
+      document.getElementById('metricScore').innerText = `${scorePct}%`;
+      document.getElementById('metricAttempts').innerHTML = `${data.attempt || 1} <span class="text-sm font-normal text-slate-500">attempt${(data.attempt > 1 ? 's' : '')}</span>`;
+      
+      const paperName = data.filename || data.paper_url || 'Research Paper';
+      document.getElementById('metricPaperId').innerText = paperName;
+      
+      const linkEl = document.getElementById('metricPaperLink');
+      if (data.paper_url && (data.paper_url.startsWith('http') || data.paper_url.includes('.'))) {
+        linkEl.classList.remove('hidden');
+        linkEl.href = data.paper_url.startsWith('http') ? data.paper_url : `https://arxiv.org/abs/${data.paper_url}`;
+      } else {
+        linkEl.classList.add('hidden');
+      }
+      
+      document.getElementById('metricFeedback').innerText = data.quiz_feedback || 'Understanding verified.';
+
+      // Tab 1: Understanding Notes
+      const markedOptions = { breaks: true, gfm: true };
+      document.getElementById('understandContent').innerHTML = marked.parse(data.understanding_notes || '*No notes generated.*', markedOptions);
+
+      // Tab 2: Apply (Code Sketch & Teach Back)
+      document.getElementById('applyContent').innerHTML = marked.parse(data.output || '*No code generated.*', markedOptions);
+
+      // Tab 3: Recall Quiz
+      const questions = data.quiz || [];
+      document.getElementById('quizCount').innerText = questions.length;
+      document.getElementById('quizBadgeScore').innerText = `Comprehension Grade: ${scorePct}%`;
+      document.getElementById('quizFeedbackDetail').innerHTML = `<strong>Evaluator Feedback:</strong> ${data.quiz_feedback || 'Understanding verified successfully.'}`;
+
+      const quizContainer = document.getElementById('quizCardsContainer');
+      quizContainer.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-950/80 border border-slate-800 p-5 rounded-2xl';
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <span class="h-6 w-6 rounded-full bg-amber-950/80 border border-amber-800/60 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                ${idx + 1}
+              </span>
+              <p class="font-medium text-slate-100 text-sm sm:text-base">${q.question || 'Question'}</p>
+            </div>
+            <button onclick="toggleAnswer(${idx})" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition shrink-0">
+              Reveal Answer
+            </button>
+          </div>
+          <div id="answer-${idx}" class="hidden mt-4 pl-9 space-y-2 border-t border-slate-800/60 pt-3">
+            <div class="text-xs text-slate-300">
+              <strong class="text-emerald-400">Expected Answer:</strong> ${q.expected_answer || 'N/A'}
+            </div>
+            ${q.notes_coverage ? `
+              <div class="text-xs text-slate-400">
+                <strong class="text-sky-400">Coverage in Notes:</strong> ${q.notes_coverage}
+              </div>
+            ` : ''}
+          </div>
+        `;
+        quizContainer.appendChild(card);
+      });
+
+      // Tab 4: Sections
+      const sections = data.sections || {};
+      document.getElementById('sectionPageCount').innerText = `${sections.page_count || 1} pages parsed`;
+      const secContainer = document.getElementById('sectionsContainer');
+      secContainer.innerHTML = '';
+
+      Object.entries(sections).forEach(([secKey, secVal]) => {
+        if (secKey === 'page_count') return;
+        const details = document.createElement('details');
+        details.className = 'group bg-slate-950/60 border border-slate-800 rounded-xl p-4 transition';
+        details.innerHTML = `
+          <summary class="font-semibold text-sm text-slate-300 cursor-pointer flex items-center justify-between uppercase tracking-wider select-none">
+            <span>${secKey}</span>
+            <i class="ph ph-caret-down group-open:rotate-180 transition-transform text-slate-500"></i>
+          </summary>
+          <div class="mt-3 text-xs text-slate-400 whitespace-pre-wrap font-mono max-h-64 overflow-y-auto bg-slate-900/60 p-3 rounded-lg border border-slate-800/80">
+            ${secVal}
+          </div>
+        `;
+        secContainer.appendChild(details);
+      });
+
+      // Syntax highlight code blocks
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+      });
+
+      // Show container & switch to first tab
+      document.getElementById('resultsContainer').classList.remove('hidden');
+      switchTab('tab-understand');
+    }
+
+    function toggleAnswer(idx) {
+      const el = document.getElementById(`answer-${idx}`);
+      if (el) {
+        el.classList.toggle('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

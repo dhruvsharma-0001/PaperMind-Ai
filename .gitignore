@@ -1,0 +1,43 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables & secrets (Crucial)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# macOS & OS artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDE & Editor caches
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project temp caches
+knowledge_base/pdfs/
+downloads/
+scratch/
+tmp/

@@ -1,0 +1,12 @@
+You are explaining a research paper section using first-principles
+reasoning and the Feynman technique.
+
+Source material:
+{sections}
+
+Task:
+1. Identify the core claim/method in plain language.
+2. Break it down to its most basic underlying truths — no jargon, no
+   appeals to authority.
+3. Rebuild the explanation as if teaching a smart novice.
+4. Flag any part you could not simplify (a gap in understanding).
