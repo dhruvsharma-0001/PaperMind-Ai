@@ -186,16 +186,52 @@ papermind-ai/
 
 ---
 
-## 🚀 Version 2.0 Roadmap & Upcoming Speed Upgrades
+## 🚀 Version 2.0 Roadmap & Upcoming Technical Upgrades
 
-The upcoming **v2.0 release** focuses on high-throughput reading, sub-second response streaming, and advanced UI components:
+The upcoming **v2.0 release** transforms PaperMind AI into an enterprise-grade, sub-second research intelligence platform through native systems programming, speculative execution, and enhanced cognitive workflows:
 
-* ⚡ **PyMuPDF / C-Engine Ingestion**: Replacing pure-Python PDF extraction with PyMuPDF/PyPDFium2 for **10x–20x faster PDF parsing** and robust 2-column layout recognition.
-* 🌊 **Real-Time Token Streaming (SSE)**: Server-Sent Events for live token generation with sub-second Time-To-First-Token.
-* 🔄 **Async Concurrent Batch Worker**: Multi-threaded parallel downloading and chunking for arXiv batches.
-* 🧩 **Two-Tier Synthesis Pipeline**: Instant 1-second executive skim generation + asynchronous background deep-stack extraction.
-* 🎴 **Anki Flashcards Export & Vector Search**: Automatic CSV generation for spaced repetition and vector memory index.
-* 🎨 **UI / JavaScript Enhancements**: Modernized dashboard components, interactive force-graph visualizer, and responsive study workflows.
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        PAPERMIND AI — VERSION 2.0 ARCHITECTURE                         │
+├──────────────────────────────┬─────────────────────────────┬───────────────────────────┤
+│    🦀 RUST CORE ENGINE       │   ⚡ STREAMING PIPELINE     │   🧠 COGNITIVE & STUDY    │
+│  • PyO3 / C-Bindings         │ • Sub-second SSE Streaming  │ • 8-Layer Bloom Stack     │
+│  • SIMD PDF Layout Parsing   │ • Speculative 2-Tier Engine │ • Anki .apkg / CSV Export │
+│  • Rust-Native Tokenizer     │ • WebSockets State Updates  │ • Obsidian [[WikiLinks]]  │
+│  • Zero-Copy mmap Buffering  │ • Chunked LPU Token Feeds   │ • HNSW Vector RAG Chat    │
+└──────────────────────────────┴─────────────────────────────┴───────────────────────────┘
+```
+
+### 1. 🦀 Native Rust Core & C-Engine Acceleration (`PyO3`)
+* **SIMD-Accelerated PDF Ingestion**: Replacing pure-Python PDF parsers with a native **Rust engine (`pdf-extract-rs` / PyO3 / PyMuPDF C-bindings)**, achieving **15x–30x faster text extraction** (<15ms per 20-page paper).
+* **Multi-Column Column Reflow & De-noising**: Native geometric bounding-box sorting to reconstruct complex multi-column academic layouts without corrupting mathematical equations or footnotes.
+* **Zero-Copy Memory-Mapped Buffers (`mmap`)**: Stream PDF bytes directly from network sockets into native memory without intermediate Python string allocation overhead.
+* **Rust-Native Token Counter**: High-speed BPE tokenization in Rust for precise context-window budgeting before dispatching to LLM providers.
+
+### 2. ⚡ Real-Time Token Streaming & Sub-Second TTFT
+* **Server-Sent Events (SSE) & WebSockets**: Transition from batch REST responses to live chunked streaming over SSE, providing **Time-To-First-Token (TTFT) under 400ms**.
+* **Progressive Markdown & Math Rendering**: Stream First-Principles notes and PyTorch code blocks progressively into the UI in real-time as Groq LPUs generate tokens.
+* **Live Graph Node State Broadcasting**: Real-time visual progress indicators highlighting the active LangGraph node (`Ingest` ➔ `Understand` ➔ `Recall Check` ➔ `Apply`).
+
+### 3. 🌊 Speculative Two-Tier Cognitive Synthesis
+* **Tier 1 — Instant Executive Skim (<1.2s)**: Speculative first-pass summary (Core Problem, Proposed Architecture, Primary Benchmark Result) generated instantly via lightweight 20B models (`openai/gpt-oss-20b`).
+* **Tier 2 — Asynchronous Deep-Stack Decomposition**: Concurrent background extraction of first-principles axioms, Socratic 5-Whys causal analysis, and runnable PyTorch code via 120B parameter models.
+
+### 4. 🎴 Active Recall & Spaced Repetition (Anki Deck Export)
+* **Automated Cloze & QA Flashcard Generation**: Extract high-yield conceptual flashcards formatted with LaTeX math and code snippets.
+* **Direct Export to Anki (`.apkg` and `.csv`)**: One-click export into Anki desktop/mobile with hierarchical paper tags (`#paper/attention`, `#ml/transformers`).
+* **In-App 3D Flip Study Player**: Interactive review session directly inside the web UI powered by an embedded SM-2 / Leitner spaced repetition scheduler.
+
+### 5. 🕸️ Embedded Vector Memory & Knowledge Graph (RAG)
+* **Cross-Paper Vector Search**: Embedded Rust-based HNSW vector index (Qdrant/Faiss) for asking grounded technical questions across your entire paper collection.
+* **Obsidian-Compatible Vault Generation**: Auto-generate markdown notes with YAML frontmatter, math blocks, and bidirectional `[[WikiLinks]]` connecting papers to foundational concepts.
+* **Interactive Force-Directed Graph (D3.js / WebGL)**: Visual 3D concept graph linking papers, architectures, mathematical axioms, and shared benchmarks.
+
+### 6. 🎨 Advanced UI / UX & Math Typography
+* **KaTeX / LaTeX Mathematical Typesetting**: Full textbook-grade rendering of complex loss functions, matrix equations, and mathematical derivations.
+* **Monaco / CodeMirror Interactive Editor**: Live editable code sketch sandbox with syntax highlighting and instant snippet execution.
+* **Zero-Build Vanilla Architecture**: Ultra-lightweight, responsive dark-mode dashboard with zero heavy build tool dependencies.
+
 
 ---
 
